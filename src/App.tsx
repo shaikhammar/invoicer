@@ -4,6 +4,7 @@ import InvoiceForm from "./components/InvoiceForm";
 import InvoicePDF from "./components/InvoicePDF";
 import { Button } from "@/components/ui/button";
 import type { InvoiceData } from "./types/invoice";
+import InvoicePreview from "./components/InvoicePreview";
 
 const initialData: InvoiceData = {
   businessName: "",
@@ -23,6 +24,7 @@ const initialData: InvoiceData = {
 
 function App() {
   const [invoiceData, setInvoiceData] = useState<InvoiceData>(initialData);
+  const [activeTab, setActiveTab] = useState<"form" | "preview">("form");
 
   function handleChange(
     field: keyof InvoiceData,
@@ -32,22 +34,68 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold">Invoice Generator</h1>
-
-        <InvoiceForm data={invoiceData} onChange={handleChange} />
-
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b px-6 py-4 flex items-center justify-between">
+        <h1 className="text-xl font-bold">Invoice Generator</h1>
         <PDFDownloadLink
           document={<InvoicePDF data={invoiceData} />}
           fileName={`${invoiceData.invoiceNumber}.pdf`}
         >
           {({ loading }) => (
-            <Button className="w-full">
-              {loading ? "Preparing PDF..." : "Download Invoice PDF"}
-            </Button>
+            <Button>{loading ? "Preparing..." : "Download PDF"}</Button>
           )}
         </PDFDownloadLink>
+      </header>
+
+      {/* Mobile Tab Toggle */}
+      <div className="flex md:hidden border-b bg-white">
+        <button
+          className={`flex-1 py-3 text-sm font-medium ${
+            activeTab === "form"
+              ? "border-b-2 border-black text-black"
+              : "text-gray-400"
+          }`}
+          onClick={() => setActiveTab("form")}
+        >
+          Edit
+        </button>
+        <button
+          className={`flex-1 py-3 text-sm font-medium ${
+            activeTab === "preview"
+              ? "border-b-2 border-black text-black"
+              : "text-gray-400"
+          }`}
+          onClick={() => setActiveTab("preview")}
+        >
+          Preview
+        </button>
+      </div>
+
+      {/* Main Layout */}
+      <div className="flex h-[calc(100vh-65px)]">
+        {/* Left Panel — Form */}
+        <div
+          className={`
+            w-full md:w-1/2 overflow-y-auto p-6
+            ${activeTab === "preview" ? "hidden md:block" : "block"}
+          `}
+        >
+          <InvoiceForm data={invoiceData} onChange={handleChange} />
+        </div>
+
+        {/* Divider */}
+        <div className="hidden md:block w-px bg-gray-200" />
+
+        {/* Right Panel — Preview */}
+        <div
+          className={`
+            w-full md:w-1/2 bg-gray-100
+            ${activeTab === "form" ? "hidden md:block" : "block"}
+          `}
+        >
+          <InvoicePreview data={invoiceData} />
+        </div>
       </div>
     </div>
   );
