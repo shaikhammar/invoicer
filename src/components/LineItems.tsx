@@ -6,10 +6,11 @@ import { Delete02Icon } from "@hugeicons/core-free-icons";
 
 interface LineItemsProps {
   items: LineItem[];
+  currency: string;
   onChange: (items: LineItem[]) => void;
 }
 
-function LineItems({ items, onChange }: LineItemsProps) {
+function LineItems({ items, currency, onChange }: LineItemsProps) {
   function handleItemChange(
     id: string,
     field: keyof LineItem,
@@ -84,7 +85,7 @@ function LineItems({ items, onChange }: LineItemsProps) {
             />
           </div>
           <div className="col-span-1 text-right text-sm font-medium">
-            ${(item.quantity * item.rate).toFixed(2)}
+            {currency} {(item.quantity * item.rate).toFixed(2)}
           </div>
           <div className="col-span-1 flex justify-end">
             <Button

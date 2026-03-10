@@ -1,16 +1,19 @@
-import { useState } from "react";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import InvoiceForm from "./components/InvoiceForm";
 import InvoicePDF from "./components/InvoicePDF";
 import { Button } from "@/components/ui/button";
 import type { InvoiceData } from "./types/invoice";
 import InvoicePreview from "./components/InvoicePreview";
+import { useLocalStorage } from "@uidotdev/usehooks";
 
 const initialData: InvoiceData = {
   businessName: "",
+  businessAddress: "",
   clientName: "",
+  clientAddress: "",
   invoiceNumber: "INV-001",
   date: new Date().toISOString().split("T")[0],
+  dueDate: "",
   lineItems: [
     {
       id: crypto.randomUUID(),
@@ -20,17 +23,47 @@ const initialData: InvoiceData = {
     },
   ],
   taxRate: 0,
+  notes: "",
+  currency: "$",
+  logo: null,
 };
 
 function App() {
-  const [invoiceData, setInvoiceData] = useState<InvoiceData>(initialData);
-  const [activeTab, setActiveTab] = useState<"form" | "preview">("form");
+  const [invoiceData, setInvoiceData] = useLocalStorage<InvoiceData>(
+    "invoice-draft",
+    initialData,
+  );
+  const [activeTab, setActiveTab] = useLocalStorage<"form" | "preview">(
+    "active-tab",
+    "form",
+  );
 
   function handleChange(
     field: keyof InvoiceData,
     value: InvoiceData[keyof InvoiceData],
   ) {
-    setInvoiceData((prev) => ({ ...prev, [field]: value }));
+    setInvoiceData({ ...invoiceData, [field]: value });
+  }
+
+  function handleNewInvoice() {
+    const confirmed = window.confirm(
+      "Start a new invoice? Your current work will be cleared.",
+    );
+    if (confirmed) {
+      setInvoiceData({
+        ...initialData,
+        date: new Date().toISOString().split("T")[0],
+        lineItems: [
+          {
+            id: crypto.randomUUID(),
+            description: "",
+            quantity: 1,
+            rate: 0,
+          },
+        ],
+      });
+      setActiveTab("form");
+    }
   }
 
   return (
@@ -38,14 +71,19 @@ function App() {
       {/* Header */}
       <header className="bg-white border-b px-6 py-4 flex items-center justify-between">
         <h1 className="text-xl font-bold">Invoice Generator</h1>
-        <PDFDownloadLink
-          document={<InvoicePDF data={invoiceData} />}
-          fileName={`${invoiceData.invoiceNumber}.pdf`}
-        >
-          {({ loading }) => (
-            <Button>{loading ? "Preparing..." : "Download PDF"}</Button>
-          )}
-        </PDFDownloadLink>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" onClick={handleNewInvoice}>
+            New Invoice
+          </Button>
+          <PDFDownloadLink
+            document={<InvoicePDF data={invoiceData} />}
+            fileName={`${invoiceData.invoiceNumber}.pdf`}
+          >
+            {({ loading }) => (
+              <Button>{loading ? "Preparing..." : "Download PDF"}</Button>
+            )}
+          </PDFDownloadLink>
+        </div>
       </header>
 
       {/* Mobile Tab Toggle */}

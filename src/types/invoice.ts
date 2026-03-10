@@ -7,9 +7,15 @@ export interface LineItem {
 
 export interface InvoiceData {
   businessName: string;
+  businessAddress: string;
   clientName: string;
+  clientAddress: string;
   invoiceNumber: string;
   date: string;
+  dueDate: string;
   lineItems: LineItem[];
   taxRate: number;
+  notes: string;
+  currency: string;
+  logo: string | null;
 }

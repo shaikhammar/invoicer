@@ -9,18 +9,9 @@ interface InvoicePreviewProps {
 }
 
 function InvoicePreview({ data }: InvoicePreviewProps) {
-  //   const [ready, setReady] = useState<boolean>(false);
   const isMounted = useIsMounted();
 
   const debouncedData = useDebounce(data, 300);
-
-  //   useEffect(() => {
-  //     const timer = setTimeout(() => {
-  //       setReady(true);
-  //     }, 100);
-  //     return () => clearTimeout(timer);
-  //   }, [data]);
-
   if (!isMounted)
     return (
       <div className="w-full h-full flex items-center justify-center text-gray-400">
