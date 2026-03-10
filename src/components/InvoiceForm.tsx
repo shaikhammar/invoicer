@@ -19,6 +19,8 @@ import {
 import { CURRENCIES } from "@/config/currencies";
 import useLogoUpload from "@/hooks/useLogoUpload";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 interface InvoiceFormProps {
   data: InvoiceData;
@@ -33,9 +35,28 @@ function InvoiceForm({ data, onChange }: InvoiceFormProps) {
   const tax = calculateTax(subtotal, data.taxRate);
   const total = calculateTotal(subtotal, tax);
 
-  const { handleUpload, handleRemove } = useLogoUpload((base64) =>
-    onChange("logo", base64),
+  const [logoUrl, setLogoUrl] = useState<string | null>("");
+  const [logoError, setLogoError] = useState<string | null>("");
+  const [logoLoading, setLogoLoading] = useState<boolean>(false);
+
+  const { handleUpload, handleUrlImport, handleRemove } = useLogoUpload(
+    (base64) => onChange("logo", base64),
   );
+  async function handleUrlSubmit() {
+    if (!logoUrl?.trim()) return;
+    setLogoError("");
+    setLogoLoading(true);
+    try {
+      await handleUrlImport(logoUrl.trim());
+      setLogoUrl("");
+    } catch (error) {
+      setLogoError(
+        error instanceof Error ? error.message : "Image failed to load",
+      );
+    } finally {
+      setLogoLoading(false);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -57,7 +78,44 @@ function InvoiceForm({ data, onChange }: InvoiceFormProps) {
               </Button>
             </div>
           ) : (
-            <Input type="file" accept="image/*" onChange={handleUpload} />
+            <Tabs defaultValue="file">
+              <TabsList className="mb-3">
+                <TabsTrigger value="file">Upload File</TabsTrigger>
+                <TabsTrigger value="url">From URL</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="file">
+                <Input type="file" accept="image/*" onChange={handleUpload} />
+              </TabsContent>
+
+              <TabsContent value="url" className="space-y-2">
+                <div className="flex gap-2">
+                  <Input
+                    value={logoUrl ?? ""}
+                    onChange={(e) => {
+                      setLogoUrl(e.target.value);
+                      setLogoError("");
+                    }}
+                    placeholder="https://yourwebsite.com/logo.png"
+                    onKeyDown={(e) => e.key === "Enter" && handleUrlSubmit()}
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={handleUrlSubmit}
+                    disabled={logoLoading || !logoUrl?.trim()}
+                  >
+                    {logoLoading ? "Loading..." : "Import"}
+                  </Button>
+                </div>
+                {logoError && (
+                  <p className="text-sm text-red-500">{logoError}</p>
+                )}
+                <p className="text-xs text-gray-400">
+                  Press Enter or click Import. The image will be embedded in
+                  your PDF.
+                </p>
+              </TabsContent>
+            </Tabs>
           )}
         </CardContent>
       </Card>
