@@ -1,10 +1,45 @@
-import { PDFDownloadLink } from "@react-pdf/renderer";
+import { useState, lazy, Suspense } from "react";
+import type { InvoiceData } from "@/types/invoice";
 import InvoiceForm from "./components/InvoiceForm";
-import InvoicePDF from "./components/InvoicePDF";
+import InvoiceList from "./components/InvoiceList";
 import { Button } from "@/components/ui/button";
-import type { InvoiceData } from "./types/invoice";
-import InvoicePreview from "./components/InvoicePreview";
 import { useLocalStorage } from "@uidotdev/usehooks";
+import useInvoices from "@/hooks/useInvoices";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { FolderOpenIcon, SaveIcon } from "@hugeicons/core-free-icons";
+
+const InvoicePreview = lazy(() =>
+  import("@/components/PDFComponents").then((m) => ({
+    default: m.InvoicePreview as React.FC<{ data: InvoiceData }>,
+  })),
+);
+
+const PDFDownloadButton = lazy(() =>
+  import("@/components/PDFComponents").then((m) => {
+    const { PDFDownloadLink, InvoicePDF } = m;
+    return {
+      default: function DownloadButton({ data }: { data: InvoiceData }) {
+        return (
+          <PDFDownloadLink
+            document={<InvoicePDF data={data} />}
+            fileName={`${data.invoiceNumber}.pdf`}
+          >
+            {({ loading }: { loading: boolean }) => (
+              <Button>{loading ? "Preparing..." : "Download PDF"}</Button>
+            )}
+          </PDFDownloadLink>
+        );
+      },
+    };
+  }),
+);
 
 const initialData: InvoiceData = {
   businessName: "",
@@ -15,12 +50,7 @@ const initialData: InvoiceData = {
   date: new Date().toISOString().split("T")[0],
   dueDate: "",
   lineItems: [
-    {
-      id: crypto.randomUUID(),
-      description: "",
-      quantity: 1,
-      rate: 0,
-    },
+    { id: crypto.randomUUID(), description: "", quantity: 1, rate: 0 },
   ],
   taxRate: 0,
   notes: "",
@@ -37,6 +67,9 @@ function App() {
     "active-tab",
     "form",
   );
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const { savedInvoices, saveInvoice, deleteInvoice, duplicateInvoice } =
+    useInvoices();
 
   function handleChange(
     field: keyof InvoiceData,
@@ -54,15 +87,26 @@ function App() {
         ...initialData,
         date: new Date().toISOString().split("T")[0],
         lineItems: [
-          {
-            id: crypto.randomUUID(),
-            description: "",
-            quantity: 1,
-            rate: 0,
-          },
+          { id: crypto.randomUUID(), description: "", quantity: 1, rate: 0 },
         ],
       });
-      setActiveTab("form");
+    }
+  }
+
+  function handleSave() {
+    saveInvoice(invoiceData);
+  }
+
+  function handleLoad(data: InvoiceData) {
+    setInvoiceData(data);
+    setSheetOpen(false);
+  }
+
+  function handleDuplicate(id: string) {
+    const duplicated = duplicateInvoice(id);
+    if (duplicated) {
+      setInvoiceData(duplicated);
+      setSheetOpen(false);
     }
   }
 
@@ -71,18 +115,40 @@ function App() {
       {/* Header */}
       <header className="bg-white border-b px-6 py-4 flex items-center justify-between">
         <h1 className="text-xl font-bold">Invoice Generator</h1>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={handleNewInvoice}>
-            New Invoice
+        <div className="flex items-center gap-2">
+          {/* Saved Invoices Sheet */}
+          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+            <SheetTrigger
+              render={
+                <Button variant="outline" size="icon">
+                  <HugeiconsIcon icon={FolderOpenIcon} className="w-4 h-4" />
+                </Button>
+              }
+            ></SheetTrigger>
+            <SheetContent side="left" className="w-80 p-0">
+              <SheetHeader className="p-4 border-b">
+                <SheetTitle>Saved Invoices</SheetTitle>
+              </SheetHeader>
+              <InvoiceList
+                invoices={savedInvoices}
+                onLoad={handleLoad}
+                onDelete={deleteInvoice}
+                onDuplicate={handleDuplicate}
+              />
+            </SheetContent>
+          </Sheet>
+
+          <Button variant="outline" size="icon" onClick={handleSave}>
+            <HugeiconsIcon icon={SaveIcon} className="w-4 h-4" />
           </Button>
-          <PDFDownloadLink
-            document={<InvoicePDF data={invoiceData} />}
-            fileName={`${invoiceData.invoiceNumber}.pdf`}
-          >
-            {({ loading }) => (
-              <Button>{loading ? "Preparing..." : "Download PDF"}</Button>
-            )}
-          </PDFDownloadLink>
+
+          <Button variant="outline" onClick={handleNewInvoice}>
+            New
+          </Button>
+
+          <Suspense fallback={<Button disabled>Loading...</Button>}>
+            <PDFDownloadButton data={invoiceData} />
+          </Suspense>
         </div>
       </header>
 
@@ -132,7 +198,15 @@ function App() {
             ${activeTab === "form" ? "hidden md:block" : "block"}
           `}
         >
-          <InvoicePreview data={invoiceData} />
+          <Suspense
+            fallback={
+              <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                Loading preview...
+              </div>
+            }
+          >
+            <InvoicePreview data={invoiceData} />
+          </Suspense>
         </div>
       </div>
     </div>

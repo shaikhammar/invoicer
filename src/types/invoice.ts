@@ -19,3 +19,9 @@ export interface InvoiceData {
   currency: string;
   logo: string | null;
 }
+
+export interface SavedInvoice {
+  id: string;
+  savedAt: string;
+  data: InvoiceData;
+}
