@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Delete02Icon } from "@hugeicons/core-free-icons";
+import { Textarea } from "./ui/textarea";
 
 interface LineItemsProps {
   items: LineItem[];
@@ -47,7 +48,7 @@ function LineItems({ items, currency, onChange }: LineItemsProps) {
       {items.map((item) => (
         <div key={item.id} className="grid grid-cols-12 gap-2 items-center">
           <div className="col-span-5">
-            <Input
+            <Textarea
               value={item.description}
               onChange={(e) =>
                 handleItemChange(item.id, "description", e.target.value)

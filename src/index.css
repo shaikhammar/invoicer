@@ -127,3 +127,37 @@
     @apply font-sans;
     }
 }
+
+/* ── PrintView: hidden on screen, shown in print ── */
+.print-view {
+  display: none;
+}
+
+/* ── Print‑optimised styles ─────────────── */
+@media print {
+  @page {
+    margin: 10mm;
+    size: auto;
+  }
+
+  body {
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Hide all app UI */
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Show the HTML print view */
+  .print-view {
+    display: block !important;
+  }
+
+  /* Remove box-shadows in print */
+  * {
+    box-shadow: none !important;
+  }
+}

@@ -15,110 +15,129 @@ import {
 } from "@/utils/calculations";
 import { hexToLightTint } from "@/utils/colorUtils";
 
-/* ─── neutral tokens (never change) ─── */
-const DARK = "#0F172A";
-const MUTED = "#64748B";
-const BORDER = "#E2E8F0";
-const BG_LIGHT = "#F8FAFC";
+/* ─── neutral tokens ─── */
+const DARK = "#1E1E1E";
+const MUTED = "#555555";
+const BORDER = "#CCCCCC";
 
 function buildStyles(accent: string, accentLight: string) {
   return StyleSheet.create({
-    /* ── page ─────────────────────────────── */
     page: {
       paddingTop: 0,
       paddingBottom: 48,
       paddingHorizontal: 0,
       fontSize: 10,
-      fontFamily: "Helvetica",
+      fontFamily: "Times-Roman",
       color: DARK,
       backgroundColor: "#FFFFFF",
     },
 
-    /* ── accent bar ──────────────────────── */
-    accentBar: {
-      height: 6,
+    /* ── header band ─────────────────────── */
+    headerBand: {
       backgroundColor: accent,
-    },
-
-    /* ── body wrapper ────────────────────── */
-    body: {
+      paddingVertical: 28,
       paddingHorizontal: 48,
-      paddingTop: 36,
-    },
-
-    /* ── header ──────────────────────────── */
-    header: {
       flexDirection: "row",
       justifyContent: "space-between",
-      alignItems: "flex-start",
-      marginBottom: 32,
+      alignItems: "center",
     },
     headerLeft: {
       flexDirection: "column",
-      gap: 6,
+      gap: 4,
     },
     logo: {
-      width: 100,
-      height: 50,
+      width: 90,
+      height: 45,
       objectFit: "contain",
     },
-    businessNameFallback: {
-      fontSize: 18,
-      fontFamily: "Helvetica-Bold",
-      color: DARK,
+    businessName: {
+      fontSize: 20,
+      fontFamily: "Times-Bold",
+      color: "#FFFFFF",
+    },
+    businessAddress: {
+      fontSize: 9,
+      color: "#FFFFFF",
+      opacity: 0.85,
+      lineHeight: 1.5,
+      marginTop: 2,
     },
     headerRight: {
       alignItems: "flex-end",
     },
     invoiceTitle: {
-      fontSize: 32,
-      fontFamily: "Helvetica-Bold",
-      color: accent,
-      letterSpacing: 1,
+      fontSize: 30,
+      fontFamily: "Times-Bold",
+      color: "#FFFFFF",
+      letterSpacing: 2,
       textTransform: "uppercase",
     },
-    invoiceNumberBadge: {
-      marginTop: 6,
-      backgroundColor: accentLight,
-      paddingVertical: 4,
-      paddingHorizontal: 12,
-      borderRadius: 4,
-    },
-    invoiceNumberText: {
-      fontSize: 10,
-      fontFamily: "Helvetica-Bold",
-      color: accent,
+    invoiceNumber: {
+      fontSize: 11,
+      color: "#FFFFFF",
+      opacity: 0.85,
+      marginTop: 4,
     },
 
-    /* ── divider ─────────────────────────── */
-    divider: {
-      height: 1,
-      backgroundColor: BORDER,
-      marginVertical: 20,
+    /* ── body ────────────────────────────── */
+    body: {
+      paddingHorizontal: 48,
+      paddingTop: 28,
+    },
+
+    /* ── meta row ────────────────────────── */
+    metaRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: 24,
+      paddingBottom: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: BORDER,
+    },
+    metaItem: {
+      flexDirection: "column",
+      alignItems: "center",
+    },
+    metaLabel: {
+      fontSize: 8,
+      fontFamily: "Times-Bold",
+      color: MUTED,
+      textTransform: "uppercase",
+      letterSpacing: 1,
+      marginBottom: 3,
+    },
+    metaValue: {
+      fontFamily: "Times-Bold",
+      fontSize: 11,
+      color: DARK,
     },
 
     /* ── parties ─────────────────────────── */
     partiesRow: {
       flexDirection: "row",
       justifyContent: "space-between",
-      marginBottom: 8,
+      marginBottom: 24,
     },
     partyBlock: {
       width: "48%",
     },
     partyLabel: {
       fontSize: 8,
-      fontFamily: "Helvetica-Bold",
+      fontFamily: "Times-Bold",
       color: accent,
       textTransform: "uppercase",
       letterSpacing: 1.5,
       marginBottom: 6,
+      paddingBottom: 4,
+      borderBottomWidth: 1,
+      borderBottomColor: accent,
     },
     partyName: {
-      fontFamily: "Helvetica-Bold",
+      fontFamily: "Times-Bold",
       fontSize: 12,
       color: DARK,
-      marginBottom: 3,
+      marginBottom: 2,
+      marginTop: 6,
     },
     partyAddress: {
       color: MUTED,
@@ -126,75 +145,39 @@ function buildStyles(accent: string, accentLight: string) {
       fontSize: 10,
     },
 
-    /* ── meta row (dates) ────────────────── */
-    metaRow: {
-      flexDirection: "row",
-      backgroundColor: BG_LIGHT,
-      borderRadius: 4,
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      marginBottom: 28,
-      gap: 0,
-    },
-    metaBlock: {
-      flex: 1,
-      alignItems: "center",
-    },
-    metaBlockWithBorder: {
-      flex: 1,
-      alignItems: "center",
-      borderLeftWidth: 1,
-      borderLeftColor: BORDER,
-    },
-    metaLabel: {
-      fontSize: 8,
-      fontFamily: "Helvetica-Bold",
-      color: MUTED,
-      textTransform: "uppercase",
-      letterSpacing: 1,
-      marginBottom: 3,
-    },
-    metaValue: {
-      fontFamily: "Helvetica-Bold",
-      fontSize: 11,
-      color: DARK,
-    },
-
     /* ── table ───────────────────────────── */
     tableHeader: {
       flexDirection: "row",
       backgroundColor: accent,
       paddingVertical: 8,
-      paddingHorizontal: 12,
-      borderRadius: 4,
-      marginBottom: 2,
+      paddingHorizontal: 10,
     },
     tableHeaderText: {
-      fontSize: 8,
-      fontFamily: "Helvetica-Bold",
+      fontSize: 9,
+      fontFamily: "Times-Bold",
       color: "#FFFFFF",
       textTransform: "uppercase",
-      letterSpacing: 1,
+      letterSpacing: 0.5,
     },
     tableRow: {
       flexDirection: "row",
-      paddingVertical: 10,
-      paddingHorizontal: 12,
+      paddingVertical: 9,
+      paddingHorizontal: 10,
       borderBottomWidth: 1,
       borderBottomColor: BORDER,
     },
     tableRowAlt: {
       flexDirection: "row",
-      paddingVertical: 10,
-      paddingHorizontal: 12,
+      paddingVertical: 9,
+      paddingHorizontal: 10,
       borderBottomWidth: 1,
       borderBottomColor: BORDER,
-      backgroundColor: BG_LIGHT,
+      backgroundColor: accentLight,
     },
     colDesc: { flex: 3 },
     colQty: { flex: 1, textAlign: "center" },
     colRate: { flex: 1, textAlign: "right" },
-    colTotal: { flex: 1, textAlign: "right", fontFamily: "Helvetica-Bold" },
+    colTotal: { flex: 1, textAlign: "right", fontFamily: "Times-Bold" },
 
     /* ── totals ──────────────────────────── */
     totalsWrapper: {
@@ -204,21 +187,20 @@ function buildStyles(accent: string, accentLight: string) {
     },
     totalsBox: {
       width: 240,
-      borderRadius: 4,
       overflow: "hidden",
     },
     totalRow: {
       flexDirection: "row",
       justifyContent: "space-between",
-      paddingVertical: 6,
-      paddingHorizontal: 16,
+      paddingVertical: 5,
+      paddingHorizontal: 12,
     },
     totalLabel: {
       color: MUTED,
       fontSize: 10,
     },
     totalValue: {
-      fontFamily: "Helvetica-Bold",
+      fontFamily: "Times-Bold",
       fontSize: 10,
       color: DARK,
     },
@@ -227,33 +209,30 @@ function buildStyles(accent: string, accentLight: string) {
       justifyContent: "space-between",
       backgroundColor: accent,
       paddingVertical: 10,
-      paddingHorizontal: 16,
-      borderRadius: 4,
+      paddingHorizontal: 12,
       marginTop: 4,
     },
     grandTotalLabel: {
-      fontFamily: "Helvetica-Bold",
+      fontFamily: "Times-Bold",
       fontSize: 13,
       color: "#FFFFFF",
     },
     grandTotalValue: {
-      fontFamily: "Helvetica-Bold",
+      fontFamily: "Times-Bold",
       fontSize: 13,
       color: "#FFFFFF",
     },
 
     /* ── notes ───────────────────────────── */
     notesContainer: {
-      marginTop: 36,
-      padding: 16,
-      backgroundColor: BG_LIGHT,
-      borderRadius: 4,
-      borderLeftWidth: 3,
-      borderLeftColor: accent,
+      marginTop: 32,
+      paddingTop: 12,
+      borderTopWidth: 1,
+      borderTopColor: BORDER,
     },
     notesLabel: {
-      fontSize: 8,
-      fontFamily: "Helvetica-Bold",
+      fontSize: 9,
+      fontFamily: "Times-Bold",
       color: accent,
       textTransform: "uppercase",
       letterSpacing: 1,
@@ -273,31 +252,31 @@ function buildStyles(accent: string, accentLight: string) {
       right: 48,
       flexDirection: "row",
       justifyContent: "center",
-      paddingTop: 12,
+      paddingTop: 10,
       borderTopWidth: 1,
       borderTopColor: BORDER,
     },
     footerText: {
       fontSize: 8,
       color: MUTED,
+      fontFamily: "Times-Roman",
     },
   });
 }
 
-interface InvoicePDFProps {
+interface InvoicePDFClassicProps {
   data: InvoiceData;
   accentColor?: string;
   pageSize?: PageSize;
 }
 
-function InvoicePDF({
+function InvoicePDFClassic({
   data,
   accentColor = "#0084c7",
   pageSize = "A4",
-}: InvoicePDFProps) {
-  const accent = accentColor;
-  const accentLight = hexToLightTint(accent);
-  const styles = buildStyles(accent, accentLight);
+}: InvoicePDFClassicProps) {
+  const accentLight = hexToLightTint(accentColor, 0.92);
+  const styles = buildStyles(accentColor, accentLight);
 
   const subtotal = calculateSubtotal(data.lineItems);
   const discount = calculateDiscount(
@@ -314,34 +293,44 @@ function InvoicePDF({
   return (
     <Document>
       <Page size={pageSize} style={styles.page}>
-        {/* ── Accent bar ─────────────────── */}
-        <View style={styles.accentBar} />
+        {/* ── Header Band ────────────────── */}
+        <View style={styles.headerBand}>
+          <View style={styles.headerLeft}>
+            {data.logo ? (
+              <Image src={data.logo} style={styles.logo} />
+            ) : (
+              <Text style={styles.businessName}>
+                {data.businessName || "Your Business"}
+              </Text>
+            )}
+            {data.businessAddress ? (
+              <Text style={styles.businessAddress}>{data.businessAddress}</Text>
+            ) : null}
+          </View>
+          <View style={styles.headerRight}>
+            <Text style={styles.invoiceTitle}>Invoice</Text>
+            <Text style={styles.invoiceNumber}># {data.invoiceNumber}</Text>
+          </View>
+        </View>
 
         <View style={styles.body}>
-          {/* ── Header ────────────────────── */}
-          <View style={styles.header}>
-            <View style={styles.headerLeft}>
-              {data.logo ? (
-                <Image src={data.logo} style={styles.logo} />
-              ) : (
-                <Text style={styles.businessNameFallback}>
-                  {data.businessName || "Your Business"}
-                </Text>
-              )}
+          {/* ── Meta ─────────────────────── */}
+          <View style={styles.metaRow}>
+            <View style={styles.metaItem}>
+              <Text style={styles.metaLabel}>Invoice No.</Text>
+              <Text style={styles.metaValue}>{data.invoiceNumber}</Text>
             </View>
-            <View style={styles.headerRight}>
-              <Text style={styles.invoiceTitle}>Invoice</Text>
-              {data.invoiceNumber ? (
-                <View style={styles.invoiceNumberBadge}>
-                  <Text style={styles.invoiceNumberText}>
-                    # {data.invoiceNumber}
-                  </Text>
-                </View>
-              ) : null}
+            <View style={styles.metaItem}>
+              <Text style={styles.metaLabel}>Issue Date</Text>
+              <Text style={styles.metaValue}>{data.date}</Text>
             </View>
+            {data.dueDate ? (
+              <View style={styles.metaItem}>
+                <Text style={styles.metaLabel}>Due Date</Text>
+                <Text style={styles.metaValue}>{data.dueDate}</Text>
+              </View>
+            ) : null}
           </View>
-
-          <View style={styles.divider} />
 
           {/* ── Parties ───────────────────── */}
           <View style={styles.partiesRow}>
@@ -355,26 +344,6 @@ function InvoicePDF({
               <Text style={styles.partyName}>{data.clientName || "—"}</Text>
               <Text style={styles.partyAddress}>{data.clientAddress}</Text>
             </View>
-          </View>
-
-          <View style={styles.divider} />
-
-          {/* ── Meta (invoice #, dates) ───── */}
-          <View style={styles.metaRow}>
-            <View style={styles.metaBlock}>
-              <Text style={styles.metaLabel}>Invoice No.</Text>
-              <Text style={styles.metaValue}>{data.invoiceNumber}</Text>
-            </View>
-            <View style={styles.metaBlockWithBorder}>
-              <Text style={styles.metaLabel}>Issue Date</Text>
-              <Text style={styles.metaValue}>{data.date}</Text>
-            </View>
-            {data.dueDate ? (
-              <View style={styles.metaBlockWithBorder}>
-                <Text style={styles.metaLabel}>Due Date</Text>
-                <Text style={styles.metaValue}>{data.dueDate}</Text>
-              </View>
-            ) : null}
           </View>
 
           {/* ── Line Items Table ──────────── */}
@@ -439,7 +408,6 @@ function InvoicePDF({
                   </Text>
                 </View>
               )}
-
               <View style={styles.grandTotalRow}>
                 <Text style={styles.grandTotalLabel}>Total Due</Text>
                 <Text style={styles.grandTotalValue}>
@@ -459,7 +427,7 @@ function InvoicePDF({
           ) : null}
         </View>
 
-        {/* ── Footer ──────────────────────── */}
+        {/* ── Footer ────────────────────── */}
         <View style={styles.footer} fixed>
           <Text style={styles.footerText}>{data.businessName}</Text>
         </View>
@@ -468,4 +436,4 @@ function InvoicePDF({
   );
 }
 
-export default InvoicePDF;
+export default InvoicePDFClassic;

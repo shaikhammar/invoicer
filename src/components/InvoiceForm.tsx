@@ -1,9 +1,14 @@
-import type { InvoiceData } from "@/types/invoice";
+import type {
+  InvoiceData,
+  InvoiceSettings,
+  TemplateStyle,
+} from "@/types/invoice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import LineItems from "./LineItems";
 import {
+  calculateDiscount,
   calculateSubtotal,
   calculateTax,
   calculateTotal,
@@ -28,12 +33,36 @@ interface InvoiceFormProps {
     field: keyof InvoiceData,
     value: InvoiceData[keyof InvoiceData],
   ) => void;
+  settings: InvoiceSettings;
+  onSettingsChange: (settings: InvoiceSettings) => void;
 }
 
-function InvoiceForm({ data, onChange }: InvoiceFormProps) {
+const TEMPLATE_OPTIONS: {
+  value: TemplateStyle;
+  label: string;
+  desc: string;
+}[] = [
+  { value: "modern", label: "Modern", desc: "Bold colors, rounded corners" },
+  { value: "minimal", label: "Minimal", desc: "Clean, whitespace-heavy" },
+  { value: "classic", label: "Classic", desc: "Serif fonts, formal layout" },
+];
+
+function InvoiceForm({
+  data,
+  onChange,
+  settings,
+  onSettingsChange,
+}: InvoiceFormProps) {
   const subtotal = calculateSubtotal(data.lineItems);
-  const tax = calculateTax(subtotal, data.taxRate);
-  const total = calculateTotal(subtotal, tax);
+  const discount = calculateDiscount(
+    subtotal,
+    data.discountType,
+    data.discountRate,
+    data.discountAmount,
+  );
+  const discountedSubtotal = subtotal - discount;
+  const tax = calculateTax(discountedSubtotal, data.taxRate);
+  const total = calculateTotal(discountedSubtotal, tax);
 
   const [logoUrl, setLogoUrl] = useState<string | null>("");
   const [logoError, setLogoError] = useState<string | null>("");
@@ -60,6 +89,89 @@ function InvoiceForm({ data, onChange }: InvoiceFormProps) {
 
   return (
     <div className="space-y-6">
+      {/* Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Settings</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          {/* Template Picker */}
+          <div className="space-y-2">
+            <Label>Template</Label>
+            <div className="grid grid-cols-3 gap-2">
+              {TEMPLATE_OPTIONS.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() =>
+                    onSettingsChange({ ...settings, template: t.value })
+                  }
+                  className={`rounded-lg border-2 p-3 text-left transition-all ${
+                    settings.template === t.value
+                      ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                >
+                  <span className="block text-sm font-semibold">{t.label}</span>
+                  <span className="block text-xs text-gray-400 mt-0.5">
+                    {t.desc}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Accent Color */}
+          <div className="space-y-2">
+            <Label>Brand Color</Label>
+            <div className="flex items-center gap-3">
+              <input
+                type="color"
+                value={settings.accentColor}
+                onChange={(e) =>
+                  onSettingsChange({ ...settings, accentColor: e.target.value })
+                }
+                className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5"
+              />
+              <Input
+                value={settings.accentColor}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (/^#[0-9a-fA-F]{0,6}$/.test(v)) {
+                    onSettingsChange({ ...settings, accentColor: v });
+                  }
+                }}
+                className="w-28 font-mono text-sm"
+                maxLength={7}
+                placeholder="#0084c7"
+              />
+            </div>
+          </div>
+
+          {/* Page Size */}
+          <div className="space-y-2">
+            <Label>Page Size</Label>
+            <Select
+              value={settings.pageSize}
+              onValueChange={(value) =>
+                onSettingsChange({
+                  ...settings,
+                  pageSize: value as "A4" | "LETTER",
+                })
+              }
+            >
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="A4">A4 (International)</SelectItem>
+                <SelectItem value="LETTER">US Letter</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Logo Upload */}
       <Card>
         <CardHeader>
@@ -239,6 +351,49 @@ function InvoiceForm({ data, onChange }: InvoiceFormProps) {
           </div>
           <div className="flex justify-between text-sm items-center">
             <div className="flex items-center gap-2">
+              <span className="text-gray-500">Discount</span>
+              <Select
+                value={data.discountType || "percentage"}
+                onValueChange={(value) => {
+                  if (!value) return;
+                  onChange("discountType", value as "percentage" | "fixed");
+                }}
+              >
+                <SelectTrigger className="w-24 h-7 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="percentage">%</SelectItem>
+                  <SelectItem value="fixed">{data.currency}</SelectItem>
+                </SelectContent>
+              </Select>
+              <Input
+                type="number"
+                value={
+                  data.discountType === "fixed"
+                    ? data.discountAmount
+                    : data.discountRate
+                }
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value) || 0;
+                  if (data.discountType === "fixed") {
+                    onChange("discountAmount", val);
+                  } else {
+                    onChange("discountRate", val);
+                  }
+                }}
+                className="w-20 h-7 text-sm"
+                min={0}
+                max={data.discountType === "fixed" ? undefined : 100}
+              />
+            </div>
+            <span>
+              {data.currency}
+              {discount.toFixed(2)}
+            </span>
+          </div>
+          <div className="flex justify-between text-sm items-center">
+            <div className="flex items-center gap-2">
               <span className="text-gray-500">Tax</span>
               <Input
                 type="number"
@@ -257,6 +412,7 @@ function InvoiceForm({ data, onChange }: InvoiceFormProps) {
               {tax.toFixed(2)}
             </span>
           </div>
+
           <div className="flex justify-between font-bold text-lg border-t pt-3">
             <span>Total</span>
             <span>
